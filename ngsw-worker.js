@@ -1916,7 +1916,7 @@ class Driver {
         // hasOwnProperty does not work here
         NOTIFICATION_OPTION_NAMES.filter(name => name in notification)
             .forEach(name => options[name] = notification[name]);
-        await this.broadcast({
+        await this.broadcastAndFocus({
             type: 'NOTIFICATION_CLICK',
             data: { action, notification: options },
         });
@@ -2489,6 +2489,15 @@ class Driver {
     async broadcast(msg) {
         const clients = await this.scope.clients.matchAll();
         clients.forEach(client => { client.postMessage(msg); });
+    }
+    async broadcastAndFocus(msg) {
+        const clients = await this.scope.clients.matchAll();
+        clients.forEach((client) => {
+            if ('focus' in client && !client.focused) {
+                client.focus();
+            }
+            client.postMessage(msg);
+        });
     }
     async debugState() {
         return {
